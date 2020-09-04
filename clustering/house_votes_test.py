@@ -2,9 +2,9 @@
 from clustering import ROCK
 
 # create test instance of ROCK class
-#   paramater 1: similarity threshold
-#   parameter 2: num desired clusters
-#   parameter 3: name of data set .csv file in ./data directory
+#   parameter 1: name of data set .csv file in ./data directory
+#   paramater 2: similarity threshold
+#   parameter 3: num desired clusters
 #   parameter 4: are data points labelled in first column?
 #   parameter 5: does data need to be binarized?
 
