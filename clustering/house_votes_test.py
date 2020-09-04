@@ -1,5 +1,5 @@
 # import implementation of ROCK algorithm
-from Clustering import ROCK
+from clustering import ROCK
 
 # create test instance of ROCK class
 #   paramater 1: similarity threshold
