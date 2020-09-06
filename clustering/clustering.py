@@ -11,7 +11,6 @@ class ROCK:
                 self.__data = self.binarize_data(pd.read_csv(filepath))
             else:
                 self.__data = pd.read_csv(filepath)
-                print(self.__data)
             self.__data_size = len(self.__data.index)
             self.__desired_num_clusters = int(num_clusters)
             self.__threshold = float(threshold)
