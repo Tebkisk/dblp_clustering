@@ -37,6 +37,7 @@ class dataset_builder():
         self.__crossover_threshold = threshold
 
     def load_essential_files(self):
+        # load conference and author objects from ./data directory
 
         if not all([os.path.isfile(f'./data/{filename}.pkl') for filename in self.__essential_files]):
             print("Essential file(s) missing, please run setup file.")
@@ -45,17 +46,8 @@ class dataset_builder():
         author_filenames = io_.load('author_filenames')
         pbar = tqdm(total=len(author_filenames)+1, desc='Loading essential files', leave=False)
 
-        #self.__author_id_lookup = io_.load('author_id_lookup')
-        #pbar.update(1)
-
-        #self.__disambiguation_ids = io_.load('disambiguation_ids')
-        #pbar.update(1)
-
         self.__confs = io_.load('conf_objects')
         pbar.update(1)
-
-        #self.__conf_name_lookup = io_.load('series_ids_to_names')
-        #pbar.update(1)
 
         author_filenames = io_.load('author_filenames')
 
@@ -67,6 +59,7 @@ class dataset_builder():
         pbar.close()
 
     def set_min_max_years(self):
+        # Loop over conference objects and determine earliest & latest year values
         for conf_id in self.__confs:
             for year in self.__confs[conf_id].getYears():
                 if int(year) < self.__min_year:
@@ -75,6 +68,7 @@ class dataset_builder():
                     self.__max_year = int(year)
 
     def check_year_params(self):
+        # Check that the parameters for start & end years are within min & max years
         if self._start_year < self.__min_year:
             print("Start year out of range.")
             return False
@@ -88,6 +82,8 @@ class dataset_builder():
             return True
 
     def check_thresholds(self):
+        # Check that parameters entered for threshold values are integers
+
         if not type(self.__conf_freq_threshold) == int:
             print("Conference frequency threshold must be an integer.")
             return False
@@ -99,13 +95,6 @@ class dataset_builder():
             return False
         else:
             return True
-
-    def get_input(self, prompt):
-        user_input = input(prompt)
-        if user_input.lower() in {'q','quit','exit','e'}:
-            sys.exit()
-        else:
-            return user_input
 
     def trim_conferences(self):
         confs_to_include = []
@@ -130,16 +119,23 @@ class dataset_builder():
         authors_to_include = set()
 
         pbar = tqdm(total=len(self.__authors), desc='Trimming authors to meet publication threshold', leave=True)
+
+        # Loop over all author objects & count total number of papers published within year range
         for author_id in self.__authors:
             num_papers = 0
             for year in self.__authors[author_id].papers:
                 if int(year) in self._date_range:
                     num_papers += len(self.__authors[author_id].papers[year])
 
+            # If author has published a sufficient number of papers
             if num_papers >= self.__author_pub_threshold:
+                # loop over year keys in author object confs attribute
                 for year in self.__authors[author_id].confs:
+                    # if year is within date range
                     if int(year) in self._date_range:
+                        # loop over conferences published to in that year
                         for conf_id in list(self.__authors[author_id].confs[year]):
+                            # if conference id is in conferences_to_include, add author to authors_to_include
                             if conf_id in self._conferences_to_include:
                                 authors_to_include.add(author_id)
             pbar.update(1)
@@ -150,11 +146,16 @@ class dataset_builder():
         dataset = {}
 
         pbar = tqdm(total=len(self._authors_to_include), desc='Creating dataset', leave=True)
+        # loop over authors_to_include
         for author_id in self._authors_to_include:
             dataset[author_id] = set()
+            # loop over year keys in author object confs attribute
             for year in self.__authors[author_id].confs:
+                # if year is within date range
                 if int(year) in self._date_range:
+                    # loop over conferences published to in that year
                     for conf_id in list(self.__authors[author_id].confs[year]):
+                        # if conference id is in conferences_to_include, add conf_id to current row of dataset
                         if conf_id in self._conferences_to_include:
                             dataset[author_id].add(conf_id)
             pbar.update(1)
